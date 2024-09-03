@@ -1,8 +1,5 @@
-// @ts-nocheck
-import { InputManager } from "../components/InputManager.js";
-
 export class Paddle extends Phaser.GameObjects.Rectangle {
-  constructor(scene, x, y, width, height, color, alpha, inputType) {
+  constructor(scene, x, y, width, height, color, alpha) {
     super(scene, x, y, width, height, color, alpha);
 
     // this en este contexto es la instancia de la clase Paleta
@@ -17,61 +14,21 @@ export class Paddle extends Phaser.GameObjects.Rectangle {
     //hacer que la paleta no se salga de los limites del mundo
     this.body.setCollideWorldBounds(true);
 
-    const callbacks = {
-      left: this.handleLeft.bind(this),
-      right: this.handleRight.bind(this),
-      stop: this.stop.bind(this),
-    };
-
-    this.inputManager = new InputManager({ scene, callbacks, inputConfig: this.getInputConfig(inputType) });
+    //agregar cursor
+    this.cursor = scene.input.keyboard.createCursorKeys();
+    
+    //reconocimiento del mouse
+    this.pointer = scene.input.activePointer;
   }
 
-  getInputConfig(inputType) {
-    if (inputType === "CURSOR" || inputType === "ARROWS") {
-      return {
-        left: ["LEFT", "ARROWLEFT"],
-        right: ["RIGHT", "ARROWRIGHT"],
-      };
+  update() {
+    this.x = this.pointer.x;
+    if (this.cursor.left.isDown) {
+      this.body.setVelocityX(-300);
+    } else if (this.cursor.right.isDown) {
+      this.body.setVelocityX(300);
+    } else {
+      this.body.setVelocityX(0);
     }
-
-    if (inputType === "WASD") {
-      return {
-        left: ["A"],
-        right: ["D"],
-      };
-    }
-
-    if (inputType === "IJKL") {
-      return {
-        up: ["I"],
-        down: ["K"],
-        left: ["J"],
-        right: ["L"],
-        action: ["ENTER"],
-      };
-    }
-
-    if (inputType === "MOUSE") {
-      return {
-        left: ["LEFT"],
-        right: ["RIGHT"],
-      };
-    }
-
-    return null;
   }
-
-  handleLeft() {
-    this.body.setVelocityX(-300);
-  }
-
-  handleRight() {
-    this.body.setVelocityX(300);
-  }
-
-  stop() {
-    this.body.setVelocityX(0);
-  }
-
-  update() {}
 }
